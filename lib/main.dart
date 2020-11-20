@@ -134,7 +134,7 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.blue,
+        
       ),
     );
   }
@@ -363,7 +363,7 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
         }
       },
       child: Container(
-        color: Colors.amber,
+       
       ),
     );
   }
@@ -435,7 +435,7 @@ class _TapCheckState extends State<TapCheck> {
         }
       },
       child: Container(
-        color: Colors.cyan,
+       
       ),
     );
   }
@@ -500,10 +500,10 @@ class _ShakeCheckState extends State<ShakeCheck> {
     ShakeDetector detector = ShakeDetector.autoStart(onPhoneShake: () {
       if (check) {
         _speak('رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
-        //Timer(Duration(seconds: 7), () {
-          //Navigator.of(context).pushReplacement(
-             // new MaterialPageRoute(builder: (context) => new Home()));
-       // });
+        Timer(Duration(seconds: 7), () {
+          Navigator.of(context).pushReplacement(
+             new MaterialPageRoute(builder: (context) => new Home()));
+       });
       } else {
         print('not yet');
       }

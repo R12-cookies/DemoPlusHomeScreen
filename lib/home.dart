@@ -102,7 +102,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
     });
 
     return Container(
-      child: Text('Home page'),
+      
     );
   }
 
@@ -169,7 +169,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
         }
       },
       child: Container(
-        color: Colors.orangeAccent,
+        
         child: Align(
           alignment: Alignment.center,
           child: shakeDetector(),
