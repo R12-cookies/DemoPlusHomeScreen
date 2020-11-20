@@ -4,6 +4,7 @@ import 'package:battery/battery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather/weather.dart';
 
@@ -23,14 +24,13 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
     bool _seen1 = (prefs.getBool('seen1') ?? false);
 
     if (_seen1) {
+      
       //is there away to block any interactions until the audio finishes
       // intro to home audio
     } else {
       await prefs.setBool('seen1', true);
-      Timer(Duration(seconds: 2), () {
-        _speak(
-            'مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، هُزَّ الهَاتِفَ و سَنُذَكِّرُكَ بِهَا.');
-      });
+      _speak(
+          ' مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
 
       //home audio(simple hello)
     }
@@ -44,6 +44,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
   FlutterTts flutterTts;
   String time;
   bool check = false;
+
   TtsState ttsState = TtsState.stopped;
 
   get isPlaying => ttsState == TtsState.playing;
@@ -79,7 +80,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
   initPW() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    print(position);
+
     Weather weather = await wf.currentWeatherByLocation(
         position.latitude, position.longitude);
     setState(() {
@@ -92,38 +93,60 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
     await flutterTts.speak(word);
   }
 
+  Widget shakeDetector() {
+    ShakeDetector detector = ShakeDetector.autoStart(onPhoneShake: () {
+      if (check) {
+        _speak(
+            'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
+      }
+    });
+
+    return Container(
+      child: Text('Home page'),
+    );
+  }
+
   @override
   void afterFirstLayout(BuildContext context) => checkFirstSeen();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
+      onTap: ()  {
         DateTime dateTime = DateTime.now();
+
         if (check) {
-          _speak("مرحبا" +
-              "." +
-              "الساعة الاَن هي" +
-              dateTime.toString().substring(11, 16) +
-              "." +
-              "مستوى البطارية" +
-              "$_batteryLevel" +
-              "%" +
-              "." +
-              "الجو" +
-              w.weatherDescription +
-              "." +
-              "و درجة الحرارة " +
-              w.temperature.toString());
-          _battery.batteryLevel.then((level) {
-            this.setState(() {
-              _batteryLevel = level;
+          if (w != null) {
+            _speak("الساعة الاَن هي" +
+                dateTime.toString().substring(11, 16) +
+                "." +
+                "مستوى البطارية" +
+                "$_batteryLevel" +
+                "%" +
+                "." +
+                "الجو" +
+                w.weatherDescription +
+                "." +
+                "و درجة الحرارة " +
+                w.temperature.toString());
+            _battery.batteryLevel.then((level) {
+              this.setState(() {
+                _batteryLevel = level;
+              });
             });
-          });
+          } else {
+            _speak("تَأَكَّدْ اَنَّكَ مُتَّصِلٌ بالانترنت. " +
+                "الساعة الاَن هي" +
+                dateTime.toString().substring(11, 16) +
+                "." +
+                "مستوى البطارية" +
+                "$_batteryLevel" +
+                "%" +
+                ".");
+          }
+          initPW();
         }
       },
       onDoubleTap: () {
-        Navigator.of(context).pushReplacement(
-            new MaterialPageRoute(builder: (context) => new Home()));
         if (check) {
           _speak('الصفحة الرئيسية');
         }
@@ -136,7 +159,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
       onHorizontalDragStart: (DragStartDetails details) {},
       onHorizontalDragEnd: (DragEndDetails details) {
         if (check) {
-          _speak('ترفيه');
+          _speak('تَرفيه');
         }
       },
       onVerticalDragStart: (DragStartDetails details) {},
@@ -149,7 +172,7 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
         color: Colors.orangeAccent,
         child: Align(
           alignment: Alignment.center,
-          child: Text('Home page'),
+          child: shakeDetector(),
         ),
       ),
     );

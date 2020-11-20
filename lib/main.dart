@@ -35,11 +35,11 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
 
     if (_seen) {
       
-      Navigator.of(context).pushReplacement(
-          new MaterialPageRoute(builder: (context) => new Home()));
+      Navigator.of(context).pushReplacement(new MaterialPageRoute(
+          builder: (context) => new Home()));
     } else {
-       await prefs.setBool('seen', true);
-     
+      await prefs.setBool('seen', true);
+
       Navigator.of(context).pushReplacement(
           new MaterialPageRoute(builder: (context) => new HorizontalCheck()));
     }
@@ -105,16 +105,18 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
         Duration(seconds: 2),
         () => _speak(
             'ْمرحبا بك في تطبيق مدى،قبل ان تبدأ باستعمال التطبيق عليك تعلم كيفية استخدامه. هذا التطبيق مُعَدُّ خصيصا للمكفوفين و ضعيفِي البصر. سيسمح لك هذا التطبيق بالقيام بعدة اشياء ممتعة و سيساهم في تنمية ذاكرتك.  لنتعلم بعض الحركات التي ستسمح لك باستخدامه. هل انت جاهز؟. هيا بنا. اول حركة. السَّحبُ الاُفُقِيْ.  ضع اٌصْبُعَكَ يمين الشاشة و اِسْحَبْ الى اليسار، اَوْ العكس'));
+  
   }
 
   Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(false);
+    await flutterTts.awaitSpeakCompletion(true);
     await flutterTts.speak(word);
   }
 
   @override
   void dispose() {
     super.dispose();
+    flutterTts.stop();
   }
 
   @override
@@ -125,7 +127,6 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
       },
       onHorizontalDragEnd: (DragEndDetails details) {
         if (check) {
-          _speak('ْاَحْسَنْت ');
           Navigator.of(context).pushReplacement(
               new MaterialPageRoute(builder: (context) => new VerticalCheck()));
         } else {
@@ -176,20 +177,22 @@ class _VerticalCheckState extends State<VerticalCheck> {
         check = true;
       });
     });
+
     Timer(
-        Duration(seconds: 2),
+        Duration(seconds: 1),
         () => _speak(
-            ' الحركة الثانية . السَّحْبُ العمودِيُّ.  ضع اُصْبُعَكَ اسفل الشاشة و اِسْحَبْ اِلَى الاَعلى، اَوْ العكس'));
+            ' اَحْسَنْت. الحركة الثانية . السَّحْبُ العمودِيُّ.  ضع اُصْبُعَكَ اسفل الشاشة و اِسْحَبْ اِلَى الاَعلى، اَوْ العكس'));
   }
 
   Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(false);
+    await flutterTts.awaitSpeakCompletion(true);
     await flutterTts.speak(word);
   }
 
   @override
   void dispose() {
     super.dispose();
+    flutterTts.stop();
   }
 
   @override
@@ -206,7 +209,6 @@ class _VerticalCheckState extends State<VerticalCheck> {
       },
       onVerticalDragEnd: (DragEndDetails details) {
         if (check) {
-          _speak('رائعْ');
           Navigator.of(context).pushReplacement(new MaterialPageRoute(
               builder: (context) => new LongPressCheck()));
         } else {
@@ -259,19 +261,18 @@ class _LongPressCheckState extends State<LongPressCheck> {
     Timer(
         Duration(seconds: 2),
         () => _speak(
-            ' الحركة الثالثة . النقر مُطَوَّلاً.  انقر مُطَوَّلاً في اي مكان في الشاشة'));
-
-    print('were here');
+            ' رَائِع. الحركة الثالثة . النقر مُطَوَّلاً.  انقر مُطَوَّلاً في اي مكان في الشاشة'));
   }
 
   Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(false);
+    await flutterTts.awaitSpeakCompletion(true);
     await flutterTts.speak(word);
   }
 
   @override
   void dispose() {
     super.dispose();
+    flutterTts.stop();
   }
 
   @override
@@ -284,7 +285,6 @@ class _LongPressCheckState extends State<LongPressCheck> {
       },
       onLongPressEnd: (LongPressEndDetails details) {
         if (check) {
-          _speak('جيد جدا');
           Navigator.of(context).pushReplacement(new MaterialPageRoute(
               builder: (context) => new DoubleTapCheck()));
         } else {
@@ -337,7 +337,7 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
     Timer(
         Duration(seconds: 2),
         () => _speak(
-            ' الحركة الرابعة . النقر مرتين.  انقر مرتين في اي مكان في الشاشة'));
+            'جيد جدا. الحركة الرابعة . النقر مرتين.  انقر مرتين في اي مكان في الشاشة'));
   }
 
   Future _speak(String word) async {
@@ -346,11 +346,16 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onDoubleTap: () {
         if (check) {
-          _speak('عمل جيدْ');
           Navigator.of(context).pushReplacement(
               new MaterialPageRoute(builder: (context) => new TapCheck()));
         } else {
@@ -403,8 +408,8 @@ class _TapCheckState extends State<TapCheck> {
     });
     Timer(
         Duration(seconds: 2),
-        () =>
-            _speak(' الحركة الخامسة. نَقْرَة.  انقر مرة في اي مكان في الشاشة'));
+        () => _speak(
+            'عمل جيدْ. الحركة الخامسة. نَقْرَة.  انقر مرة في اي مكان في الشاشة'));
   }
 
   Future _speak(String word) async {
@@ -413,13 +418,18 @@ class _TapCheckState extends State<TapCheck> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         if (check) {
-          _speak('رائعْ. تَبَقَّتْ حركةٌ واحدةْ');
           Navigator.of(context).pushReplacement(
-          new MaterialPageRoute(builder: (context) => new  ShakeCheck()));
+              new MaterialPageRoute(builder: (context) => new ShakeCheck()));
         } else {
           print('not yet');
         }
@@ -437,7 +447,6 @@ class ShakeCheck extends StatefulWidget {
 }
 
 class _ShakeCheckState extends State<ShakeCheck> {
-  
   TtsState ttsState = TtsState.stopped;
 
   get isPlaying => ttsState == TtsState.playing;
@@ -450,9 +459,7 @@ class _ShakeCheckState extends State<ShakeCheck> {
   void initState() {
     super.initState();
     initTts();
-    ShakeDetector detector = ShakeDetector.waitForStart();
-
-   
+    //ShakeDetector detector = ShakeDetector.waitForStart();
   }
 
   initTts() {
@@ -473,9 +480,9 @@ class _ShakeCheckState extends State<ShakeCheck> {
       });
     });
     Timer(
-        Duration(seconds: 2),
-        () =>
-            _speak(' الحركة الاَخيرة. هَزُّ الهاتف. قم بهز الهاتف قليلا عاموديا او افقيا '));
+        Duration(seconds: 3),
+        () => _speak(
+            'رائعْ. تَبَقَّتْ حَرَكَةٌ واحدةْ. الحركة الاََخِيرَةُ. هَزُّ الهاتِفِ. قم بِهَزِّ الهاتف قَلِيلاً عاموديًّا او اُفُقِيَّا '));
   }
 
   Future _speak(String word) async {
@@ -483,20 +490,24 @@ class _ShakeCheckState extends State<ShakeCheck> {
     await flutterTts.speak(word);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+  }
+
   Widget shakeDetector() {
     ShakeDetector detector = ShakeDetector.autoStart(onPhoneShake: () {
-      
       if (check) {
-        _speak('رائعْ لقد اَتْمَمْتَ كل الحركات. و انت الان جاهزُ للذهاب الى الصفحة الرئيسية ');
-        Navigator.of(context).pushReplacement(
-        new MaterialPageRoute(builder: (context) => new  Home()));
-
+        _speak('رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
+        //Timer(Duration(seconds: 7), () {
+          //Navigator.of(context).pushReplacement(
+             // new MaterialPageRoute(builder: (context) => new Home()));
+       // });
       } else {
         print('not yet');
       }
-      
     });
-    
 
     return Container();
   }
