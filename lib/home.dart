@@ -94,14 +94,15 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
   }
 
   Widget shakeDetector() {
-    ShakeDetector detector = ShakeDetector.autoStart(onPhoneShake: () {
+    // ignore: unused_local_variable
+    ShakeDetector detector = ShakeDetector.autoStart(shakeThresholdGravity: 2,onPhoneShake: () {
       if (check) {
         _speak(
             'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
       }
     });
 
-    return Container(
+    return Scaffold(
       
     );
   }
@@ -168,9 +169,9 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
           _speak('معلومات عامة');
         }
       },
-      child: Container(
+      child: Scaffold(
         
-        child: Align(
+        body: Align(
           alignment: Alignment.center,
           child: shakeDetector(),
         ),
