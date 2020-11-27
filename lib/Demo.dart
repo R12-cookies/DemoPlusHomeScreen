@@ -36,6 +36,7 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      backgroundColor: Colors.black,
       body: new Center(
         child: new Text('Loading...'),
       ),
@@ -71,6 +72,7 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
 
     flutterTts.setStartHandler(() {
       setState(() {
@@ -118,9 +120,8 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
         }
       },
       child: Scaffold(
-        body: Container(height: MediaQuery.of(context).size.height,
-        width:  MediaQuery.of(context).size.width,)
-      ),
+         backgroundColor: Colors.black,
+         ),
     );
   }
 }
@@ -148,6 +149,7 @@ class _VerticalCheckState extends State<VerticalCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -201,9 +203,8 @@ class _VerticalCheckState extends State<VerticalCheck> {
         }
       },
       child: Scaffold(
-        body: Container(height: MediaQuery.of(context).size.height,
-        width:  MediaQuery.of(context).size.width,)
-      ),
+         backgroundColor: Colors.black,
+          ),
     );
   }
 }
@@ -231,7 +232,7 @@ class _LongPressCheckState extends State<LongPressCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
-
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -280,9 +281,8 @@ class _LongPressCheckState extends State<LongPressCheck> {
         }
       },
       child: Scaffold(
-        body: Container(height: MediaQuery.of(context).size.height,
-        width:  MediaQuery.of(context).size.width,)
-      ),
+         backgroundColor: Colors.black,
+         ),
     );
   }
 }
@@ -310,6 +310,7 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -354,8 +355,9 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
           print('not yet');
         }
       },
-      child: Scaffold( body: Container(height: MediaQuery.of(context).size.height,
-        width:  MediaQuery.of(context).size.width,)),
+      child: Scaffold(
+         backgroundColor: Colors.black,
+          ),
     );
   }
 }
@@ -383,6 +385,7 @@ class _TapCheckState extends State<TapCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -425,7 +428,9 @@ class _TapCheckState extends State<TapCheck> {
           print('not yet');
         }
       },
-      child: Scaffold(),
+      child: Scaffold(
+         backgroundColor: Colors.black,
+      ),
     );
   }
 }
@@ -454,6 +459,7 @@ class _ShakeCheckState extends State<ShakeCheck> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -483,25 +489,28 @@ class _ShakeCheckState extends State<ShakeCheck> {
   void dispose() {
     super.dispose();
     flutterTts.stop();
-    
   }
 
   Widget shakeDetector() {
     // ignore: unused_local_variable
-    ShakeDetector detector = ShakeDetector.autoStart(shakeThresholdGravity: 1.7,onPhoneShake: () {
-      if (check) {
-        _speak(
-            'رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
-        Timer(Duration(seconds: 7), () {
-          Navigator.of(context).pushReplacement(
-              new MaterialPageRoute(builder: (context) => new HomeScreenSplash()));
+    ShakeDetector detector = ShakeDetector.autoStart(
+        shakeThresholdGravity: 1.7,
+        onPhoneShake: () {
+          if (check) {
+            _speak(
+                'رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
+            Timer(Duration(seconds: 7), () {
+              Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                  builder: (context) => new HomeScreenSplash()));
+            });
+          } else {
+            print('not yet');
+          }
         });
-      } else {
-        print('not yet');
-      }
-    });
 
-    return Scaffold();
+    return Scaffold(
+       backgroundColor: Colors.black,
+    );
   }
 
   @override

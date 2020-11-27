@@ -8,6 +8,8 @@ import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather/weather.dart';
 
+import 'Generalinfo.dart';
+
 class HomeScreenSplash extends StatefulWidget {
   @override
   _HomeScreenSplashState createState() => _HomeScreenSplashState();
@@ -31,6 +33,7 @@ class _HomeScreenSplashState extends State<HomeScreenSplash>
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
+    flutterTts.setSpeechRate(0.93);
 
     flutterTts.setStartHandler(() {
       setState(() {
@@ -67,7 +70,7 @@ class _HomeScreenSplashState extends State<HomeScreenSplash>
       await prefs.setBool('seen1', true);
       _speak(
           ' مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
-      Timer(Duration(seconds: 10), () {
+      Timer(Duration(seconds: 35), () {
         Navigator.of(context).pushReplacement(
             new MaterialPageRoute(builder: (context) => new Home()));
       });
@@ -120,7 +123,7 @@ class HomeState extends State<Home> {
   initTts() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage("ar-AE");
-
+    flutterTts.setSpeechRate(0.93);
     flutterTts.setStartHandler(() {
       setState(() {
         print("Playing");
@@ -164,7 +167,9 @@ class HomeState extends State<Home> {
           }
         });
 
-    return Scaffold();
+    return Scaffold(
+    backgroundColor: Colors.black,
+    );
   }
 
   @override
@@ -218,16 +223,25 @@ class HomeState extends State<Home> {
       onHorizontalDragStart: (DragStartDetails details) {},
       onHorizontalDragEnd: (DragEndDetails details) {
         if (check) {
-          _speak('تَرفيه');
+          _speak('رؤيا');
         }
+        Timer(Duration(seconds: 6), () {
+          Navigator.of(context).pushReplacement(
+              new MaterialPageRoute(builder: (context) => new GeneralInfo()));
+        });
       },
       onVerticalDragStart: (DragStartDetails details) {},
       onVerticalDragEnd: (DragEndDetails details) {
         if (check) {
           _speak('معلومات عامة');
         }
+        Timer(Duration(seconds: 6), () {
+          Navigator.of(context).pushReplacement(
+              new MaterialPageRoute(builder: (context) => new GeneralInfo()));
+        });
       },
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: Align(
           alignment: Alignment.center,
           child: shakeDetector(),

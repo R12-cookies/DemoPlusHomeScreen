@@ -121,13 +121,22 @@ class _GeneralInfoState extends State<GeneralInfo> {
   }
 
   initAudioPlayers() async {
-    _speak('لحضة واحدة جاري تحميل المقالات');
+    if (check) {
+      _speak('جاري تحميل المقالات');
+    }
+
     for (var i = 0; i < 3; i++) {
       await audioplayers[i].setUrl(urls[i]);
 
       //-----------------------------------
     }
-    _speak('تم تحميل المقالات');
+    var ready = await audioplayers[0].getDuration();
+
+    if (ready == 1) {
+      if (check) {
+        _speak('تم تحميل المقالات');
+      }
+    }
   }
 
   initTts() {
@@ -157,9 +166,9 @@ class _GeneralInfoState extends State<GeneralInfo> {
   }
 
   List<String> urls = [
-    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/universe.m4a?alt=media&token=1611fa54-6d19-47c1-9cd0-faaaf193854e',
-    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/Whale.m4a?alt=media&token=c6a594a9-e69d-47fc-aa3a-127befcd5010',
-    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/electricity.m4a?alt=media&token=a3ea4916-5008-4538-bc64-48da8c2df712',
+    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/universe.m4a?alt=media&token=f464860f-8abd-4957-976c-8bc2a28af56e',
+    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/Whale.m4a?alt=media&token=9baaf125-f2fd-4339-aa3a-a2233b4c6f11',
+    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/electricity.m4a?alt=media&token=d99d78e6-56de-40ef-a0e9-1a2061ee1ef9',
   ];
 
   void getAudio(int index, AudioPlayer audioPlayer) async {
@@ -172,8 +181,6 @@ class _GeneralInfoState extends State<GeneralInfo> {
         });
       }
     } else {
-
-     
       audioPlayer.setVolume(10);
       var res = await audioplayers[index].play(urls[index], isLocal: true);
       if (res == 1) {
@@ -191,6 +198,13 @@ class _GeneralInfoState extends State<GeneralInfo> {
       setState(() {
         positionA = dd;
       });
+    });
+
+    audioplayers[index].onPlayerCompletion.listen((event) {
+      if (check) {
+        _speak('إنتهى المقال');
+
+      }
     });
   }
 
@@ -240,7 +254,7 @@ class _GeneralInfoState extends State<GeneralInfo> {
             return Align(
               alignment: Alignment.center,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 1),
                 child: GestureDetector(
                   onVerticalDragStart: (DragStartDetails details) {
                     initial = details.globalPosition.dy;
@@ -275,7 +289,7 @@ class _GeneralInfoState extends State<GeneralInfo> {
                   child: Container(
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width * 0.9,
-                    color: Colors.amber,
+                    color: Colors.black,
                     child: shakeDetector(),
                   ),
                 ),
