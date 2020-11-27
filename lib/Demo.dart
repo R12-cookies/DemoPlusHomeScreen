@@ -494,7 +494,7 @@ class _ShakeCheckState extends State<ShakeCheck> {
             'رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
         Timer(Duration(seconds: 7), () {
           Navigator.of(context).pushReplacement(
-              new MaterialPageRoute(builder: (context) => new Home()));
+              new MaterialPageRoute(builder: (context) => new HomeScreenSplash()));
         });
       } else {
         print('not yet');

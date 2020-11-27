@@ -1,5 +1,6 @@
 import 'package:nada/CustomSlider.dart';
 import 'package:nada/Generalinfo.dart';
+import 'package:nada/home.dart';
 import 'package:nada/myturn.dart';
 import 'Demo.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(),
-      home: Splash(),
+      home: HomeScreenSplash(),
     );
   }
 }

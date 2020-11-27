@@ -8,6 +8,83 @@ import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather/weather.dart';
 
+class HomeScreenSplash extends StatefulWidget {
+  @override
+  _HomeScreenSplashState createState() => _HomeScreenSplashState();
+}
+
+class _HomeScreenSplashState extends State<HomeScreenSplash>
+    with AfterLayoutMixin<HomeScreenSplash> {
+  FlutterTts flutterTts;
+  bool check = false;
+  TtsState ttsState = TtsState.stopped;
+
+  initState() {
+    super.initState();
+
+    initTts();
+  }
+
+  get isPlaying => ttsState == TtsState.playing;
+
+  get isStopped => ttsState == TtsState.stopped;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar-AE");
+
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("Playing");
+        ttsState = TtsState.playing;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+        check = true;
+      });
+    });
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    await flutterTts.speak(word);
+  }
+
+  Future checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen1 = (prefs.getBool('seen1') ?? false);
+
+    if (_seen1) {
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new Home()));
+      prefs.remove('seen1');
+      //is there away to block any interactions until the audio finishes
+      // intro to home audio
+    } else {
+      await prefs.setBool('seen1', true);
+      _speak(
+          ' مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
+      Timer(Duration(seconds: 10), () {
+        Navigator.of(context).pushReplacement(
+            new MaterialPageRoute(builder: (context) => new Home()));
+      });
+      //home audio(simple hello)
+    }
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) => checkFirstSeen();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+    );
+  }
+}
+
 class Home extends StatefulWidget {
   @override
   HomeState createState() => new HomeState();
@@ -18,33 +95,16 @@ enum TtsState {
   stopped,
 }
 
-class HomeState extends State<Home> with AfterLayoutMixin<Home> {
-  Future checkFirstSeen() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool _seen1 = (prefs.getBool('seen1') ?? false);
-
-    if (_seen1) {
-      
-      //is there away to block any interactions until the audio finishes
-      // intro to home audio
-    } else {
-      await prefs.setBool('seen1', true);
-      _speak(
-          ' مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
-
-      //home audio(simple hello)
-    }
-  }
-
+class HomeState extends State<Home> {
   Weather w;
   WeatherFactory wf = new WeatherFactory("0159a72be3ed85ab99edbdc94dda553e",
       language: Language.ARABIC);
   final Battery _battery = Battery();
   int _batteryLevel;
   FlutterTts flutterTts;
-  String time;
-  bool check = false;
 
+  bool check = true;
+  String time;
   TtsState ttsState = TtsState.stopped;
 
   get isPlaying => ttsState == TtsState.playing;
@@ -95,24 +155,22 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
 
   Widget shakeDetector() {
     // ignore: unused_local_variable
-    ShakeDetector detector = ShakeDetector.autoStart(shakeThresholdGravity: 2,onPhoneShake: () {
-      if (check) {
-        _speak(
-            'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
-      }
-    });
+    ShakeDetector detector = ShakeDetector.autoStart(
+        shakeThresholdGravity: 2,
+        onPhoneShake: () {
+          if (check) {
+            _speak(
+                'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
+          }
+        });
 
-    return Scaffold(
-      
-    );
+    return Scaffold();
   }
 
   @override
-  void afterFirstLayout(BuildContext context) => checkFirstSeen();
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()  {
+      onTap: () {
         DateTime dateTime = DateTime.now();
 
         if (check) {
@@ -170,7 +228,6 @@ class HomeState extends State<Home> with AfterLayoutMixin<Home> {
         }
       },
       child: Scaffold(
-        
         body: Align(
           alignment: Alignment.center,
           child: shakeDetector(),
