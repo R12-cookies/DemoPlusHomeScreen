@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:after_layout/after_layout.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_slider/carousel_options.dart';
@@ -9,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'home.dart';
 
 class GISplash extends StatefulWidget {
   @override
@@ -17,40 +17,54 @@ class GISplash extends StatefulWidget {
 
 class _GISplashState extends State<GISplash> with AfterLayoutMixin<GISplash> {
   FlutterTts flutterTts;
+
+  dynamic ttsState;
   bool check = false;
-  TtsState ttsState = TtsState.stopped;
-
-  initState() {
-    super.initState();
-    initTts();
-  }
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
   initTts() {
     flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-
+    flutterTts.setLanguage("ar");
     flutterTts.setStartHandler(() {
       setState(() {
-        print("Playing");
+        print("playing");
         ttsState = TtsState.playing;
       });
     });
-
     flutterTts.setCompletionHandler(() {
       setState(() {
         print("Complete");
         ttsState = TtsState.stopped;
-        check = true;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
       });
     });
   }
 
   Future _speak(String word) async {
     await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initTts();
   }
 
   Future checkFirstSeen() async {
@@ -66,7 +80,10 @@ class _GISplashState extends State<GISplash> with AfterLayoutMixin<GISplash> {
     } else {
       await prefs.setBool('seen2', true);
       _speak(
-          'مرحبًا بك في صفحة، المعلومات العامة. في هذه الصفحة سَتَجِدُ عدة مواضيع من فِئَاتٍ مختلفة، لِتَسْتَمِعَ اِليْها. إلَيْكَ كيف تستعملها.  المواضيع متوفرة في شَاشَتِكَ مِثل البطاقات. لِلْتَنَقُّلِ مِنْ مَوضُوعٍ اِلى اَخَرْ، قُمْ بِالسَّحْبِ أُفُقِيًّا مرَّةً على حدا و سنقرأ لك الفئة الموافِقة. لإختيار فئة، يكفي ان تَنْقُرَ على الشاشة مرَّةً واحدة و ستبدأ قراءة المقال. يمكنك التسريع الى الامام عبر السَّحْبِ اِلى الاََسْفَلْ اَو العودة الى الوراء عبر السَّحْبِ اِلى الاَعلى. لِايقاف القِرَائَةِ يَكفي اَن تَنْقُرَ مَرَّةً ثَانِيَةً عَلى الشاشة. و طبعاً كَكُلِّ مَرَّةٍ اِذَا نسيت اَيَّ شيئٍ هُزَّ الهاتف و سنذكرك');
+          'مرحبًا بك في صفحة، المعلومات العامة. في هذه الصفحة سَتَجِدُ عدة مواضيع من فِئَاتٍ مختلفة، لِتَسْتَمِعَ اِليْها. إلَيْكَ كيف تستعملها.  المواضيع متوفرة في شَاشَتِكَ مِثل البطاقات. لِلْتَنَقُّلِ مِنْ مَوضُوعٍ اِلى اَخَرْ، قُمْ بِالسَّحْبِ أُفُقِيًّا مرَّةً على حدا و سنقرأ لك الفئة الموافِقة. لإختيار فئة، يكفي ان تَضغَطَ مُطَوَّلاً على الشاشة و ستبدأ قراءة المقال. يمكنك التسريع الى الامام عبر السَّحْبِ اِلى الاََسْفَلْ اَو العودة الى الوراء عبر السَّحْبِ اِلى الاَعلى. لِايقاف القِرَائَةِ يَكفي اَن تَظغَطَ مُطوَّلاً مَرَّةً ثَانِيَةً عَلى الشاشة. و طبعاً كَكُلِّ مَرَّةٍ اِذَا نسيت اَيَّ شيئٍ هُزَّ الهاتف و سنذكرك');
+
+
+
 
       Timer(Duration(seconds: 48), () {
         Navigator.of(context).pushReplacement(
@@ -74,6 +91,11 @@ class _GISplashState extends State<GISplash> with AfterLayoutMixin<GISplash> {
       });
       //home audio(simple hello)
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -102,73 +124,94 @@ class _GeneralInfoState extends State<GeneralInfo> {
     AudioPlayer(playerId: 'firstplayer'),
     AudioPlayer(playerId: 'secondplayer'),
     AudioPlayer(playerId: 'third'),
+    AudioPlayer(playerId: 'forth'),
+    AudioPlayer(playerId: 'fifth'),
   ];
 
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
   bool playing = false;
   int position;
-  bool check = true;
-  FlutterTts flutterTts;
+  ShakeDetector detector;
   @override
   void initState() {
     super.initState();
     initTts();
     initAudioPlayers();
+    detector = ShakeDetector.autoStart(
+        shakeThresholdGravity: 2.5,
+        onPhoneShake: () {
+          _speak(
+              'قم بِالسَّحْبِ اُفٌقِيًّا لتغيير الفِئَةِ. إضغَطْ مُطَوَّلاً  لِبَدْإِِ القِرَائَةِ ثم ثَانيةً لإيقافها. إسحبْ تدريجيًّا اِلَى الأَسْفَلِ للتسريع الى الأمام و اِلى الأعلى للعودة الى الوراء');
+
+          print('shake');
+        });
   }
 
   initAudioPlayers() async {
-    if (check) {
-      _speak('جاري تحميل المقالات');
-    }
+    _speak('جاري تحميل المقالات');
 
-    for (var i = 0; i < 3; i++) {
-      await audioplayers[i].setUrl(urls[i]);
+    for (var i = 0; i < 5; i++) {
+      
+      await audioplayers[i].setUrl(urls[i],isLocal: false);
 
       //-----------------------------------
-    }
-    var ready = await audioplayers[0].getDuration();
 
-    if (ready == 1) {
-      if (check) {
-        _speak('تم تحميل المقالات');
-      }
     }
+     
+    
+   
   }
 
+  FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
   initTts() {
     flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-
+    flutterTts.setLanguage("ar");
     flutterTts.setStartHandler(() {
       setState(() {
-        print("Playing");
+        print("playing");
         ttsState = TtsState.playing;
       });
     });
-
     flutterTts.setCompletionHandler(() {
       setState(() {
         print("Complete");
         ttsState = TtsState.stopped;
-        check = true;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
       });
     });
   }
 
   Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(false);
-    await flutterTts.speak(word);
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
   }
 
   List<String> urls = [
     'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/universe.m4a?alt=media&token=f464860f-8abd-4957-976c-8bc2a28af56e',
     'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/Whale.m4a?alt=media&token=9baaf125-f2fd-4339-aa3a-a2233b4c6f11',
     'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/electricity.m4a?alt=media&token=d99d78e6-56de-40ef-a0e9-1a2061ee1ef9',
+    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/Rue%20Boualem%20Kaddour%205.m4a?alt=media&token=07db4d2a-9527-4f74-821b-e46c48efe088',
+    'https://firebasestorage.googleapis.com/v0/b/basari-f6b13.appspot.com/o/Rue%20Boualem%20Kaddour%206%20(1).m4a?alt=media&token=199bf839-f51a-4922-be60-49c365589069'
   ];
 
   void getAudio(int index, AudioPlayer audioPlayer) async {
@@ -203,7 +246,6 @@ class _GeneralInfoState extends State<GeneralInfo> {
     audioplayers[index].onPlayerCompletion.listen((event) {
       if (check) {
         _speak('إنتهى المقال');
-
       }
     });
   }
@@ -212,34 +254,29 @@ class _GeneralInfoState extends State<GeneralInfo> {
     'الفلك',
     'الحياة البرية',
     'تقنيات',
-    'التنمية الذاتية'
+    'التنمية الذاتية',
+    'اَحداثٌ تاريخيّة'
   ];
 
-  Widget shakeDetector() {
-    // ignore: unused_local_variable
-    ShakeDetector detector = ShakeDetector.autoStart(
-        shakeThresholdGravity: 2.2,
-        onPhoneShake: () {
-          if (check) {
-            _speak(
-                'قم بِالسَّحْبِ اُفٌقِيًّا لتغيير الفِئَةِ. اُنْقُرْ مرة لِبَدْإِِ القِرَائَةِ ثم مرة ثانيةً لإيقافها. إسحبْ تدريجيًّا اِلَى الأَسْفَلِ للتسريع الى الأمام و اِلى الأعلى للعودة الى الوراء');
-          }
-        });
-
-    return Container();
+  @override
+  void dispose() {
+    super.dispose();
+    detector.stopListening();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Align(
         alignment: Alignment.center,
         child: CarouselSlider.builder(
           carouselController: _scrollController,
           options: CarouselOptions(
+            
             pageSnapping: true,
             enlargeCenterPage: true,
-            aspectRatio: 0.6,
+            aspectRatio: 0.57,
             initialPage: 0,
             onPageChanged: (index, reason) {
               _speak(categories[index]);
@@ -249,13 +286,17 @@ class _GeneralInfoState extends State<GeneralInfo> {
               });
             },
           ),
-          itemCount: 3,
+          itemCount: 5,
           itemBuilder: (context, index) {
             return Align(
               alignment: Alignment.center,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 1),
                 child: GestureDetector(
+                  onDoubleTap: () {
+                    Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                        builder: (context) => new Home()));
+                  },
                   onVerticalDragStart: (DragStartDetails details) {
                     initial = details.globalPosition.dy;
                     setState(() {
@@ -282,15 +323,16 @@ class _GeneralInfoState extends State<GeneralInfo> {
                   onVerticalDragEnd: (DragEndDetails details) {
                     initial = 0;
                   },
-                  onTap: () {
+                  onLongPress: () {
+                    
                     getAudio(index, audioplayers[index]);
-                    print(MediaQuery.of(context).size.height);
+                    
                   },
                   child: Container(
                     height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width * 0.9,
+                    width: MediaQuery.of(context).size.width ,
                     color: Colors.black,
-                    child: shakeDetector(),
+                   
                   ),
                 ),
               ),

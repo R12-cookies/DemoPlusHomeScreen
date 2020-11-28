@@ -4,6 +4,7 @@ import 'package:battery/battery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:nada/vision.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather/weather.dart';
@@ -17,43 +18,55 @@ class HomeScreenSplash extends StatefulWidget {
 
 class _HomeScreenSplashState extends State<HomeScreenSplash>
     with AfterLayoutMixin<HomeScreenSplash> {
-  FlutterTts flutterTts;
-  bool check = false;
-  TtsState ttsState = TtsState.stopped;
-
   initState() {
     super.initState();
-
     initTts();
   }
 
-  get isPlaying => ttsState == TtsState.playing;
+  bool check = false;
+  FlutterTts flutterTts;
 
-  get isStopped => ttsState == TtsState.stopped;
+  dynamic ttsState;
+
   initTts() {
     flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-
+    flutterTts.setLanguage("ar");
     flutterTts.setStartHandler(() {
       setState(() {
-        print("Playing");
+        print("playing");
         ttsState = TtsState.playing;
       });
     });
-
     flutterTts.setCompletionHandler(() {
       setState(() {
         print("Complete");
         ttsState = TtsState.stopped;
-        check = true;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
       });
     });
   }
 
   Future _speak(String word) async {
     await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
   }
 
   Future checkFirstSeen() async {
@@ -61,20 +74,18 @@ class _HomeScreenSplashState extends State<HomeScreenSplash>
     bool _seen1 = (prefs.getBool('seen1') ?? false);
 
     if (_seen1) {
+      prefs.remove('seen1');
       Navigator.of(context).pushReplacement(
           new MaterialPageRoute(builder: (context) => new Home()));
-      prefs.remove('seen1');
-      //is there away to block any interactions until the audio finishes
-      // intro to home audio
     } else {
       await prefs.setBool('seen1', true);
       _speak(
-          ' مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
-      Timer(Duration(seconds: 35), () {
+          'رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ.مرحبا بك في الصفحة الرئيسية. من هنا يمكنك الدخول لباقي صفحات التطبيقْ, عن طريق الحركات التي تعلمناها سابقا. اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه. أخيرا، قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. يمكنك دائما العودة الى الصفحة الرئيسية بالنقر مرتين اَينما كنت. وللحصول على معلومات عن الجو والوقت وغيرها، اٌنقُر مرة في الصفحة الرئيسية. لا تَقْلَقْ في حال ما نَسيتَ كل هذه المَعلوماتْ، قم بهز الهَاتِفَ و سَنُذَكِّرُكَ بِهَا');
+
+      Timer(Duration(seconds: 45), () {
         Navigator.of(context).pushReplacement(
             new MaterialPageRoute(builder: (context) => new Home()));
       });
-      //home audio(simple hello)
     }
   }
 
@@ -99,45 +110,75 @@ enum TtsState {
 }
 
 class HomeState extends State<Home> {
+  FlutterTts flutterTts;
+
+  dynamic ttsState;
+
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   Weather w;
   WeatherFactory wf = new WeatherFactory("0159a72be3ed85ab99edbdc94dda553e",
       language: Language.ARABIC);
   final Battery _battery = Battery();
   int _batteryLevel;
-  FlutterTts flutterTts;
 
   bool check = true;
   String time;
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
+  ShakeDetector detector;
   @override
   initState() {
     super.initState();
+    detector = ShakeDetector.autoStart(
+        shakeThresholdGravity: 2.5,
+        onPhoneShake: () {
+          _speak(
+              'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
+
+          print('shake home');
+        });
     initPW();
     initTts();
-  }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
+    _speak('الصفحة الرئيسية');
   }
 
   initPW() async {
@@ -151,25 +192,9 @@ class HomeState extends State<Home> {
     });
   }
 
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(false);
-    await flutterTts.speak(word);
-  }
-
-  Widget shakeDetector() {
-    // ignore: unused_local_variable
-    ShakeDetector detector = ShakeDetector.autoStart(
-        shakeThresholdGravity: 2,
-        onPhoneShake: () {
-          if (check) {
-            _speak(
-                'اِسحَب عمودياً لدخول صفحة الثقافة العامةْ. وأُفُقِيًا لدخول صفحة الترفيه.  قم بالنقر مُطوَّلاً لدخول صفحة الرسائل. و اٌنقُر مرة للحصول على معلومات عن الجو والوقت وغيرها');
-          }
-        });
-
-    return Scaffold(
-    backgroundColor: Colors.black,
-    );
+  void dispose() {
+    super.dispose();
+    detector.stopListening();
   }
 
   @override
@@ -178,73 +203,65 @@ class HomeState extends State<Home> {
       onTap: () {
         DateTime dateTime = DateTime.now();
 
-        if (check) {
-          if (w != null) {
-            _speak("الساعة الاَن هي" +
-                dateTime.toString().substring(11, 16) +
-                "." +
-                "مستوى البطارية" +
-                "$_batteryLevel" +
-                "%" +
-                "." +
-                "الجو" +
-                w.weatherDescription +
-                "." +
-                "و درجة الحرارة " +
-                w.temperature.toString());
-            _battery.batteryLevel.then((level) {
-              this.setState(() {
-                _batteryLevel = level;
-              });
+        if (w != null) {
+          _speak("الساعة الاَن هي" +
+              dateTime.toString().substring(11, 16) +
+              "." +
+              "مستوى البطارية" +
+              "$_batteryLevel" +
+              "%" +
+              "." +
+              "الجو" +
+              w.weatherDescription +
+              "." +
+              "و درجة الحرارة " +
+              w.temperature.toString());
+          _battery.batteryLevel.then((level) {
+            this.setState(() {
+              _batteryLevel = level;
             });
-          } else {
-            _speak("تَأَكَّدْ اَنَّكَ مُتَّصِلٌ بالانترنت. " +
-                "الساعة الاَن هي" +
-                dateTime.toString().substring(11, 16) +
-                "." +
-                "مستوى البطارية" +
-                "$_batteryLevel" +
-                "%" +
-                ".");
-          }
-          initPW();
+          });
+        } else {
+          _speak("تَأَكَّدْ اَنَّكَ مُتَّصِلٌ بالانترنت. " +
+              "الساعة الاَن هي" +
+              dateTime.toString().substring(11, 16) +
+              "." +
+              "مستوى البطارية" +
+              "$_batteryLevel" +
+              "%" +
+              ".");
         }
+        initPW();
       },
       onDoubleTap: () {
-        if (check) {
-          _speak('الصفحة الرئيسية');
-        }
+        _speak('الصفحة الرئيسية');
       },
       onLongPress: () {
-        if (check) {
-          _speak('الرسائل');
-        }
+        _speak('الرسائل');
       },
       onHorizontalDragStart: (DragStartDetails details) {},
       onHorizontalDragEnd: (DragEndDetails details) {
-        if (check) {
-          _speak('رؤيا');
-        }
-        Timer(Duration(seconds: 6), () {
+        _speak('رؤيا');
+
+        Timer(Duration(seconds: 2), () {
           Navigator.of(context).pushReplacement(
-              new MaterialPageRoute(builder: (context) => new GeneralInfo()));
+              new MaterialPageRoute(builder: (context) => VSplash()));
         });
       },
       onVerticalDragStart: (DragStartDetails details) {},
       onVerticalDragEnd: (DragEndDetails details) {
-        if (check) {
-          _speak('معلومات عامة');
-        }
-        Timer(Duration(seconds: 6), () {
+        _speak('معلومات عامة');
+
+        Timer(Duration(seconds: 3), () {
           Navigator.of(context).pushReplacement(
-              new MaterialPageRoute(builder: (context) => new GeneralInfo()));
+              new MaterialPageRoute(builder: (context) => GISplash()));
         });
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Align(
           alignment: Alignment.center,
-          child: shakeDetector(),
+          child: Scaffold(),
         ),
       ),
     );

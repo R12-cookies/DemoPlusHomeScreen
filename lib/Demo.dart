@@ -18,10 +18,8 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
     bool _seen = (prefs.getBool('seen') ?? false);
 
     if (_seen) {
-      prefs.remove('seen');
-      print('demo');
       Navigator.of(context).pushReplacement(
-          new MaterialPageRoute(builder: (context) => new Home()));
+          new MaterialPageRoute(builder: (context) => new ShakeCheck()));
     } else {
       await prefs.setBool('seen', true);
 
@@ -55,54 +53,61 @@ enum TtsState {
 }
 
 class _HorizontalCheckState extends State<HorizontalCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak(
+        'ْمرحبا بك في تطبيق مدى،قبل ان تبدأ باستعمال التطبيق عليك تعلم كيفية استخدامه. هذا التطبيق مُعَدُّ خصيصا للمكفوفين و ضعيفِي البصر. سيسمح لك هذا التطبيق بالقيام بعدة اشياء ممتعة و سيساهم في تنمية ذاكرتك.  لنتعلم بعض الحركات التي ستسمح لك باستخدامه. هل انت جاهز؟. هيا بنا. اول حركَ. السَّحبُ الاُفُقِيْ.  ضع اٌصْبُعَكَ يمين الشاشة و اِسْحَبْ الى اليسار، اَوْ العكس');
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initTts();
   }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
-    Timer(
-        Duration(seconds: 2),
-        () => _speak(
-            'ْمرحبا بك في تطبيق مدى،قبل ان تبدأ باستعمال التطبيق عليك تعلم كيفية استخدامه. هذا التطبيق مُعَدُّ خصيصا للمكفوفين و ضعيفِي البصر. سيسمح لك هذا التطبيق بالقيام بعدة اشياء ممتعة و سيساهم في تنمية ذاكرتك.  لنتعلم بعض الحركات التي ستسمح لك باستخدامه. هل انت جاهز؟. هيا بنا. اول حركة. السَّحبُ الاُفُقِيْ.  ضع اٌصْبُعَكَ يمين الشاشة و اِسْحَبْ الى اليسار، اَوْ العكس'));
-  }
-
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
   }
 
   @override
@@ -112,7 +117,7 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
         print('start horizontal drag');
       },
       onHorizontalDragEnd: (DragEndDetails details) {
-        if (check) {
+        if (ttsState == TtsState.stopped) {
           Navigator.of(context).pushReplacement(
               new MaterialPageRoute(builder: (context) => new VerticalCheck()));
         } else {
@@ -120,8 +125,8 @@ class _HorizontalCheckState extends State<HorizontalCheck> {
         }
       },
       child: Scaffold(
-         backgroundColor: Colors.black,
-         ),
+        backgroundColor: Colors.black,
+      ),
     );
   }
 }
@@ -132,54 +137,62 @@ class VerticalCheck extends StatefulWidget {
 }
 
 class _VerticalCheckState extends State<VerticalCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak(
+        ' اَحْسَنْت. الحركة الثانية . السَّحْبُ العمودِيُّ.  ضع اُصْبُعَكَ اسفل الشاشة و اِسْحَبْ اِلَى الاَعلى، اَوْ العكس');
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initTts();
   }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
-
-    Timer(
-        Duration(seconds: 1),
-        () => _speak(
-            ' اَحْسَنْت. الحركة الثانية . السَّحْبُ العمودِيُّ.  ضع اُصْبُعَكَ اسفل الشاشة و اِسْحَبْ اِلَى الاَعلى، اَوْ العكس'));
-  }
-
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
   }
 
   @override
@@ -195,7 +208,7 @@ class _VerticalCheckState extends State<VerticalCheck> {
         print('start vertical drag');
       },
       onVerticalDragEnd: (DragEndDetails details) {
-        if (check) {
+        if (ttsState == TtsState.stopped) {
           Navigator.of(context).pushReplacement(new MaterialPageRoute(
               builder: (context) => new LongPressCheck()));
         } else {
@@ -203,8 +216,8 @@ class _VerticalCheckState extends State<VerticalCheck> {
         }
       },
       child: Scaffold(
-         backgroundColor: Colors.black,
-          ),
+        backgroundColor: Colors.black,
+      ),
     );
   }
 }
@@ -215,53 +228,62 @@ class LongPressCheck extends StatefulWidget {
 }
 
 class _LongPressCheckState extends State<LongPressCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak(
+        ' رَائِع. الحركة الثالثة . النقر مُطَوَّلاً.  انقر مُطَوَّلاً في اي مكان في الشاشة');
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initTts();
   }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
-    Timer(
-        Duration(seconds: 1),
-        () => _speak(
-            ' رَائِع. الحركة الثالثة . النقر مُطَوَّلاً.  انقر مُطَوَّلاً في اي مكان في الشاشة'));
-  }
-
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
   }
 
   @override
@@ -273,7 +295,7 @@ class _LongPressCheckState extends State<LongPressCheck> {
         print('long press start');
       },
       onLongPressEnd: (LongPressEndDetails details) {
-        if (check) {
+        if (ttsState == TtsState.stopped) {
           Navigator.of(context).pushReplacement(new MaterialPageRoute(
               builder: (context) => new DoubleTapCheck()));
         } else {
@@ -281,8 +303,8 @@ class _LongPressCheckState extends State<LongPressCheck> {
         }
       },
       child: Scaffold(
-         backgroundColor: Colors.black,
-         ),
+        backgroundColor: Colors.black,
+      ),
     );
   }
 }
@@ -293,61 +315,69 @@ class DoubleTapCheck extends StatefulWidget {
 }
 
 class _DoubleTapCheckState extends State<DoubleTapCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak(
+        'جيد جدا. الحركة الرابعة . النقر مرتين.  انقر مرتين في اي مكان في الشاشة');
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initTts();
   }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
-
-    Timer(
-        Duration(seconds: 1),
-        () => _speak(
-            'جيد جدا. الحركة الرابعة . النقر مرتين.  انقر مرتين في اي مكان في الشاشة'));
-  }
-
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onDoubleTap: () {
-        if (check) {
+        if (ttsState == TtsState.stopped) {
           print('oudbletap');
           Navigator.of(context).pushReplacement(
               new MaterialPageRoute(builder: (context) => new TapCheck()));
@@ -356,8 +386,8 @@ class _DoubleTapCheckState extends State<DoubleTapCheck> {
         }
       },
       child: Scaffold(
-         backgroundColor: Colors.black,
-          ),
+        backgroundColor: Colors.black,
+      ),
     );
   }
 }
@@ -368,60 +398,68 @@ class TapCheck extends StatefulWidget {
 }
 
 class _TapCheckState extends State<TapCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
+
+  dynamic ttsState;
+  bool check = false;
+  initTts() {
+    flutterTts = FlutterTts();
+    flutterTts.setLanguage("ar");
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("playing");
+        ttsState = TtsState.playing;
+      });
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak('عمل جيدْ. الحركة الخامسة. نَقْرَة.  انقر مرة في اي مكان في الشاشة');
+  }
+
+  Future _speak(String word) async {
+    await flutterTts.awaitSpeakCompletion(true);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initTts();
   }
 
-  initTts() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
-    flutterTts.setStartHandler(() {
-      setState(() {
-        print("Playing");
-        ttsState = TtsState.playing;
-      });
-    });
-
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        print("Complete");
-        ttsState = TtsState.stopped;
-        check = true;
-      });
-    });
-    Timer(
-        Duration(seconds: 1),
-        () => _speak(
-            'عمل جيدْ. الحركة الخامسة. نَقْرَة.  انقر مرة في اي مكان في الشاشة'));
-  }
-
-  Future _speak(String word) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (check) {
+        if (ttsState == TtsState.stopped) {
           Navigator.of(context).pushReplacement(
               new MaterialPageRoute(builder: (context) => new ShakeCheck()));
         } else {
@@ -429,7 +467,7 @@ class _TapCheckState extends State<TapCheck> {
         }
       },
       child: Scaffold(
-         backgroundColor: Colors.black,
+        backgroundColor: Colors.black,
       ),
     );
   }
@@ -441,80 +479,78 @@ class ShakeCheck extends StatefulWidget {
 }
 
 class _ShakeCheckState extends State<ShakeCheck> {
-  TtsState ttsState = TtsState.stopped;
-
-  get isPlaying => ttsState == TtsState.playing;
-
-  get isStopped => ttsState == TtsState.stopped;
-
-  bool check = false;
   FlutterTts flutterTts;
-  @override
-  void initState() {
-    super.initState();
-    initTts();
-    //ShakeDetector detector = ShakeDetector.waitForStart();
-  }
 
+  dynamic ttsState;
+  bool check = false;
   initTts() {
     flutterTts = FlutterTts();
-    flutterTts.setLanguage("ar-AE");
-    flutterTts.setSpeechRate(0.93);
+    flutterTts.setLanguage("ar");
     flutterTts.setStartHandler(() {
       setState(() {
-        print("Playing");
+        print("playing");
         ttsState = TtsState.playing;
       });
     });
-
     flutterTts.setCompletionHandler(() {
       setState(() {
         print("Complete");
         ttsState = TtsState.stopped;
-        check = true;
       });
     });
-    Timer(
-        Duration(seconds: 1),
-        () => _speak(
-            'رائعْ. تَبَقَّتْ حَرَكَةٌ واحدةْ. الحركة الاََخِيرَةُ. هَزُّ الهاتِفِ. قم بِهَزِّ الهاتف قَلِيلاً عاموديًّا او اُفُقِيَّا '));
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+    _speak(
+        'رائعْ. تَبَقَّتْ حَرَكَةٌ واحدةْ. الحركة الاََخِيرَةُ. هَزُّ الهاتِفِ. قم بِهَزِّ الهاتف قَلِيلاً عاموديًّا او اُفُقِيَّا ');
   }
 
   Future _speak(String word) async {
     await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(word);
+    if (ttsState == TtsState.playing) {
+      var result = await flutterTts.stop();
+      if (result == 1) {
+        print(result);
+        setState(() {
+          ttsState = TtsState.stopped;
+          check = true;
+        });
+        await new Future.delayed(const Duration(seconds: 1));
+        _speak(word);
+      }
+    } else {
+      await flutterTts.speak(word);
+    }
+  }
+
+  ShakeDetector detector;
+  @override
+  void initState() {
+    super.initState();
+    detector = ShakeDetector.autoStart(
+        shakeThresholdGravity: 1.7,
+        onPhoneShake: () {
+          if (ttsState == TtsState.stopped) {
+            Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                builder: (context) => new HomeScreenSplash()));
+          } else {
+            print('not yet');
+          }
+        });
+    initTts();
   }
 
   @override
   void dispose() {
     super.dispose();
-    flutterTts.stop();
-  }
-
-  Widget shakeDetector() {
-    // ignore: unused_local_variable
-    ShakeDetector detector = ShakeDetector.autoStart(
-        shakeThresholdGravity: 1.7,
-        onPhoneShake: () {
-          if (check) {
-            _speak(
-                'رائعْ. لقد اَتْمَمْتَ كُلَّ الحَرَكَاتْ. و انت الان جاهزُ للذهاب الى الصفحةِ الرئيسيةْ');
-            Timer(Duration(seconds: 7), () {
-              Navigator.of(context).pushReplacement(new MaterialPageRoute(
-                  builder: (context) => new HomeScreenSplash()));
-            });
-          } else {
-            print('not yet');
-          }
-        });
-
-    return Scaffold(
-       backgroundColor: Colors.black,
-    );
+    detector.stopListening();
   }
 
   @override
   Widget build(BuildContext context) {
-    return shakeDetector();
+    return Scaffold();
   }
 }

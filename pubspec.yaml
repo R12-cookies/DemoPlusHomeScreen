@@ -29,7 +29,8 @@ dependencies:
   audioplayers: ^0.17.0
   scrollable_positioned_list: ^0.1.8
   carousel_slider: ^2.3.1
-  swipedetector: ^1.2.0
+  
+  sensors: ^0.4.2+6
 
 
   flutter_localizations:

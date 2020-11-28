@@ -1,6 +1,7 @@
 
 import 'package:nada/Generalinfo.dart';
 import 'package:nada/home.dart';
+import 'package:nada/vision.dart';
 
 import 'Demo.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(),
-      home: GISplash(),
+      home: Splash(),
     );
   }
 }

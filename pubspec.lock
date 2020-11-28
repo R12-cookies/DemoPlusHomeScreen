@@ -288,7 +288,7 @@ packages:
     source: hosted
     version: "0.1.8"
   sensors:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sensors
       url: "https://pub.dartlang.org"
@@ -376,13 +376,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
-  swipedetector:
-    dependency: "direct main"
-    description:
-      name: swipedetector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:
